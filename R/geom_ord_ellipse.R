@@ -40,9 +40,9 @@ geom_ord_ellipse <- function(mapping = NULL, ellipse_pro = 0.97, fill = NA, ...)
 ##' @importFrom plyr ddply
 ##' @importFrom grDevices chull
 StatOrdEllipse <- ggproto("StatOrdEllipse", Stat,
-                          compute_group = function(self, data, scales, params, ellipse_pro) {
+                          compute_group = function(self, data, scales, ellipse_pro) {
                               names(data)[1:2] <- c('one', 'two')
-                              theta <- c(seq(-pi, pi, length = 50), seq(pi, -pi, length = 50))
+                              theta <- seq(-pi, pi, length = 50)
                               circle <- cbind(cos(theta), sin(theta))
                               ell <- ddply(data, .(group), function(x) {
                                   if(nrow(x) <= 2) {
@@ -53,16 +53,17 @@ StatOrdEllipse <- ggproto("StatOrdEllipse", Stat,
                                   ed <- sqrt(qchisq(ellipse_pro, df = 2))
                                   data.frame(sweep(circle %*% chol(sigma) * ed, 2, mu, FUN = '+'))
                               })
-                              names(ell)[2:3] <- c('one', 'two')
-                              ell <- ddply(ell, .(group), function(x) x[chull(x$one, x$two), ])
                               names(ell) <- c('Groups', 'x', 'y')
                               return(ell)
                           },
                           required_aes = c("x", "y", "group")
-                          )
+)
 
 
 ## . function was from plyr package
 . <- function (..., .env = parent.frame()) {
     structure(as.list(match.call()[-1]), env = .env, class = "quoted")
 }
+
+
+
